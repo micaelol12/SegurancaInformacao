@@ -1,78 +1,60 @@
+from collections import deque
+
 class CercaFerroviaria():
-    trilhas = 0
-    caractere_vazio = ''
-
-    def __init__(self,ptrilhas):
-        self.trilhas = ptrilhas
-
-    def criaMatriz(self,colunas):
-        return [[self.caractere_vazio for _ in range(colunas)] for _ in range(self.trilhas)]
-
-    def cifrar(self,texto):
-        texto = texto.replace(' ','')
-        l_texto = len(texto)
-        cifra = ""
-        matriz = self.criaMatriz(l_texto)
-        i = 0
-        j = 0
-        a = 1
-
-        while i < l_texto:
-            matriz[j][i] = texto[i]
-            i+=1
-            j += a
-            
-            if j == self.trilhas -1:
-                a = -1
-            if j == 0:
-                a = 1
+    def __init__(self,trilhas: int):
+        self.trilhas = trilhas
         
-        for i in range(self.trilhas):
-            for j in range(l_texto):
-                if matriz[i][j] != '':
-                    cifra += matriz[i][j]
+
+    def _cria_matriz(self,colunas:int) -> list[list[str]]:
+        return [['' for _ in range(colunas)] for _ in range(self.trilhas)]
+    
+             
+    def cifrar(self, texto:str) -> str:
+        texto = texto.replace(' ','')
+        matriz = self._cria_matriz(len(texto))
+        cifra = ""
+        
+        trilho,direcao = 0,1
+        for coluna,char in enumerate(texto):
+            matriz[trilho][coluna] = char
+            trilho += direcao
+            
+            if trilho == self.trilhas - 1 or trilho == 0:
+                direcao *= -1
+        
+        for linha in matriz:
+            for char in linha:
+                cifra += char
                     
         return cifra
+    
         
     def decifrar(self,cifra):
-        l_texto = len(cifra)
-        matriz = self.criaMatriz(l_texto)
+        l_cifra = len(cifra)
+        matriz = self._cria_matriz(l_cifra)
         decifrado = ""
-        i = 0
-        j = 0
-        a = 1
 
-        while i < l_texto:
-            matriz[j][i] = '@'
-            i+=1
-            j += a
+        trilho,direcao = 0,1
+        for coluna in range(l_cifra):
+            matriz[trilho][coluna] = '@'
+            trilho += direcao
             
-            if j == self.trilhas -1:
-                a = -1
-            if j == 0:
-                a = 1
-         
+            if trilho == self.trilhas - 1 or trilho == 0:
+                direcao *= -1
+                
+        chars = deque(cifra)
         for i in range(self.trilhas):
-            for j in range(l_texto):
+            for j in range(l_cifra):
                 if matriz[i][j] == '@':
-                    matriz[i][j] = cifra[0]
-                    cifra = cifra[1:]
-                
-        i = 0
-        j = 0
-        a = 1
-        
-        while i < l_texto:
-            if matriz[j][i] != '':
-                decifrado += matriz[j][i]
-                
-            i+=1
-            j += a
+                    matriz[i][j] = chars.popleft()
+                    
+        trilho,direcao = 0,1
+        for coluna in range(l_cifra):
+            decifrado += matriz[trilho][coluna]
+            trilho += direcao
             
-            if j == self.trilhas -1:
-                a = -1
-            if j == 0:
-                a = 1
+            if trilho == self.trilhas - 1 or trilho == 0:
+                direcao *= -1
                 
         return decifrado
 
