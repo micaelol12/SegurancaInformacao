@@ -29,7 +29,7 @@ class CercaFerroviaria():
         return cifra
     
         
-    def decifrar(self,cifra):
+    def decifrar(self,cifra:str) -> str:
         l_cifra = len(cifra)
         matriz = self._cria_matriz(l_cifra)
         decifrado = ""
@@ -57,8 +57,6 @@ class CercaFerroviaria():
                 direcao *= -1
                 
         return decifrado
-
-
 
 
 t = CercaFerroviaria(3)

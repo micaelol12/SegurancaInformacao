@@ -2,17 +2,14 @@
 import math
 
 class TransposicaoColunar():
-    colunas = 0
-    caractere_vazio = 'X'
-
-    def __init__(self,pcolunas):
-        self.colunas = pcolunas
+    def __init__(self,colunas:int):
+        self.colunas = colunas
 
     def _cria_matriz(self,linhas):
-        return [[self.caractere_vazio for _ in range(self.colunas)] for _ in range(linhas)]
+        return [['X' for _ in range(self.colunas)] for _ in range(linhas)]
     
 
-    def cifrar(self,texto):
+    def cifrar(self,texto:str) -> str:
         texto = texto.replace(' ','')
         linhas = math.ceil(len(texto) / self.colunas)
         matriz = self._cria_matriz(linhas)
@@ -32,7 +29,7 @@ class TransposicaoColunar():
         return cifrado
     
         
-    def decifrar(self,cifra):
+    def decifrar(self,cifra:str) -> str:
         linhas = len(cifra) // self.colunas
         matriz = self._cria_matriz(linhas)
         decifrado = ""
