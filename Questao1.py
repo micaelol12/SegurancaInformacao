@@ -8,12 +8,15 @@ class TransposicaoColunar():
     def __init__(self,pcolunas):
         self.colunas = pcolunas
 
+    def criaMatriz(self,linhas):
+        return [[self.caractere_vazio for _ in range(self.colunas)] for _ in range(linhas)]
+
     def cifrar(self,texto):
         texto = texto.replace(' ','')
         linhas = math.ceil(len(texto) / self.colunas)
         cifrado = "" 
 
-        matriz = [[self.caractere_vazio for _ in range(self.colunas)] for _ in range(linhas)]
+        matriz = self.criaMatriz(linhas)
 
         for i in range(linhas):
             for j in range(self.colunas):
@@ -35,14 +38,13 @@ class TransposicaoColunar():
     def decifrar(self,cifra):
         decifrado = ""
         linhas = int(len(cifra)/self.colunas)
-        matriz = [[self.caractere_vazio for _ in range(self.colunas)] for _ in range(linhas)]
+        matriz = self.criaMatriz(linhas)
 
         for j in range(self.colunas):
             for i in range(linhas):
                 posicao = (linhas * j) + i
                 matriz[i][j] = cifra[posicao]
         
-
         for i in range(linhas):
             for j in range(self.colunas):
                 decifrado += matriz[i][j]
