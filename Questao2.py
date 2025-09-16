@@ -35,7 +35,46 @@ class CercaFerroviaria():
         return cifra
         
     def decifrar(self,cifra):
-        pass
+        l_texto = len(cifra)
+        matriz = self.criaMatriz(l_texto)
+        decifrado = ""
+        i = 0
+        j = 0
+        a = 1
+
+        while i < l_texto:
+            matriz[j][i] = '@'
+            i+=1
+            j += a
+            
+            if j == self.trilhas -1:
+                a = -1
+            if j == 0:
+                a = 1
+         
+        for i in range(self.trilhas):
+            for j in range(l_texto):
+                if matriz[i][j] == '@':
+                    matriz[i][j] = cifra[0]
+                    cifra = cifra[1:]
+                
+        i = 0
+        j = 0
+        a = 1
+        
+        while i < l_texto:
+            if matriz[j][i] != '':
+                decifrado += matriz[j][i]
+                
+            i+=1
+            j += a
+            
+            if j == self.trilhas -1:
+                a = -1
+            if j == 0:
+                a = 1
+                
+        return decifrado
 
 
 
