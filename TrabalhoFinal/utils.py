@@ -28,5 +28,5 @@ MULTIPLICATION_MATRIX = [[2, 3, 1, 1],
 
 
 def get_state_matrix(data: list) -> Matrix:
-    matrix = [[data[i + j*4] for j in range(4)] for i in range(4)]
-    return matrix
+    return [[data[row + 4*col] for col in range(4)] for row in range(4)]
+

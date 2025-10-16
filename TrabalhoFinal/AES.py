@@ -29,7 +29,7 @@ class AES():
         state_matrix = get_state_matrix(block)
         a = self.__add_round_key(state_matrix, key_schedule[0])
 
-        for i in range(1, 9):
+        for i in range(1, 10):
             b = self.__sub_bytes(a)
             c = self.__shift_rows(b)
             d = self.__mix_columns(c)
@@ -79,7 +79,9 @@ class AES():
 
     def __shift_rows(self, matrix: Matrix) -> Matrix:
         new_state = [[0] * 4 for _ in range(4)]
-
+        
+        new_state[0] = matrix[0]
+        
         for i in range(1, 4):
             new_state[i] = matrix[i][i:] + matrix[i][:i]
         return new_state
@@ -88,10 +90,6 @@ class AES():
         pass
 
     def __add_round_key(self, simple_text: Matrix, round_key: Key) -> Matrix:
-        return [[simple_text[row][col] ^ round_key[row][col] for col in range(4)] for row in range(4)]
+        return [[simple_text[row][col] ^ round_key[col][row] for col in range(4)] for row in range(4)]
 
-
-aes = AES(key=b'ABCDEFGHIJKLMNOP')
-ciphertext  = aes.encrypt(msg=b'DESENVOLVIMENTO!')
-print(ciphertext.hex())
 
