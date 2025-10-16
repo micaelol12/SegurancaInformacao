@@ -1,4 +1,4 @@
-from utils import AES_SBOX, ROUND_CONSTANT
+from utils import AES_SBOX, ROUND_CONSTANT,get_state_matrix
 from Class import Key, Word
 
 
@@ -18,13 +18,9 @@ class KeyManager():
             key_schedule.append(round_key)
 
         return key_schedule
-
-    def __get_state_matrix(self) -> list[list[int]]:
-        matrix = [[self.key[i + j*4] for j in range(4)] for i in range(4)]
-        return matrix
-
+    
     def __get_original_key(self) -> Key:
-        state_matrix = self.__get_state_matrix()
+        state_matrix = get_state_matrix(self.key)
         original_key = []
 
         for c in range(4):
