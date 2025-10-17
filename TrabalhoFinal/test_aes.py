@@ -14,3 +14,14 @@ def test_aes_encryption():
     ciphertext_lib = cipher_lib.encrypt(pad(msg, 16))  
 
     assert ciphertext == ciphertext_lib, "Custom AES encryption does not match library AES encryption"
+    
+def test_aes_decryption():
+    key = b'ABCDEFGHIJKLMNOP'
+    msg = b'DESENVOLVIMENTO!'
+    
+    aes = AES(key)
+    ciphertext  = aes.encrypt(msg=msg)
+    
+    d_msg = aes.decrypt(ciphertext)
+    
+    assert msg == d_msg

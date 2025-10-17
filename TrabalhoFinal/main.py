@@ -15,3 +15,5 @@ ciphertext_lib = cipher_lib.encrypt(pad(msg, 16))
 print("Custom AES:  ", ciphertext.hex())
 print("Lib AES:     ", ciphertext_lib.hex())
 
+
+d_msg = aes.decrypt(ciphertext_lib)
