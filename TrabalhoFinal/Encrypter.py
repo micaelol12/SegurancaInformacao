@@ -1,7 +1,6 @@
 from enum import Enum
 from AES import AES
 import sys
-import os
 
 
 class Options(Enum):
