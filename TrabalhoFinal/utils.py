@@ -46,7 +46,7 @@ MULTIPLICATION_MATRIX = [[2, 3, 1, 1],
                          [1, 1, 2, 3],
                          [3, 1, 1, 2]]
 
-MULTIPLICATION_INV_MATRIX = [[14, 11, 13, 19],
+MULTIPLICATION_INV_MATRIX = [[14, 11, 13, 9],
                              [9, 14, 11, 13],
                              [13, 9, 14, 11],
                              [11, 13, 9, 14]]

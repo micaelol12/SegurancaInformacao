@@ -1,6 +1,6 @@
 from AES import AES
 from Crypto.Cipher import AES as CryptoAES
-from Crypto.Util.Padding import pad, unpad
+from Crypto.Util.Padding import pad
 
 
 def test_aes_encryption():
@@ -13,7 +13,7 @@ def test_aes_encryption():
     cipher_lib = CryptoAES.new(key, CryptoAES.MODE_ECB)
     ciphertext_lib = cipher_lib.encrypt(pad(msg, 16))  
 
-    assert ciphertext == ciphertext_lib, "Custom AES encryption does not match library AES encryption"
+    assert ciphertext == ciphertext_lib
     
 def test_aes_decryption():
     key = b'ABCDEFGHIJKLMNOP'

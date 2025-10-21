@@ -17,3 +17,5 @@ class BlockManager():
 
         if pad_len < 1 or pad_len > 16:
             raise ValueError("Padding inválido")
+        
+        return data[:-pad_len]

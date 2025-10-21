@@ -17,3 +17,5 @@ print("Lib AES:     ", ciphertext_lib.hex())
 
 
 d_msg = aes.decrypt(ciphertext_lib)
+
+print("Decifrado:", d_msg.decode('utf-8'))
