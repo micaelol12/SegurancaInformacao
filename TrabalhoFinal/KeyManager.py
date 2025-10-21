@@ -4,7 +4,7 @@ from Class import Key, Word
 
 class KeyManager():
     def __init__(self, key: list[bytes]):
-        self.key = key
+        self.__set_key(key)
 
     def expand_keys(self) -> list[Key]:
         original_key = self.__get_original_key()
@@ -56,6 +56,12 @@ class KeyManager():
 
     def __word_replacement(self, word: Word) -> Word:
         return [AES_SBOX[b] for b in word]
+    
+    def __set_key(self,key: list[bytes]):
+        if len(key) not in (16, 24, 32):
+                raise ValueError("A chave deve conter 16, 24 ou 32 bytes para o AES.")
+            
+        self.key = key
 
     def __round_bytes(self, bytes: Word) -> Word:
         return bytes[1:] + bytes[:1]
