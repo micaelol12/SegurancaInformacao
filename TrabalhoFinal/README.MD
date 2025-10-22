@@ -1,6 +1,6 @@
 # Trabalho Final
 
-- Professor: Gilvan Justino (Mestrado em Ciências da Computação)
+Programa de criptografia  e  descriptografia  através  do  algoritmo  AES
 
 
 ## Como Rodar
