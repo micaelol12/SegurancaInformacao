@@ -58,8 +58,8 @@ class KeyManager():
         return [AES_SBOX[b] for b in word]
     
     def __set_key(self,key: list[bytes]):
-        if len(key) not in (16, 24, 32):
-                raise ValueError("A chave deve conter 16, 24 ou 32 bytes para o AES.")
+        if len(key) != 16:
+                raise ValueError("A chave deve conter 16 bytes")
             
         self.key = key
 
