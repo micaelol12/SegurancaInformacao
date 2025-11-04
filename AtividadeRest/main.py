@@ -3,16 +3,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from schema import UserSchema,UserPublic,UserList
 from security import verify_password
 from sqlalchemy.orm import Session
-from database import  get_db
+from database import  get_db, Base,engine
 
 import crud
-import sqlite3
-
 
 app = FastAPI()
-conn = sqlite3.connect('mydatabase.db',check_same_thread=False)
-cursor = conn.cursor()
-
+Base.metadata.create_all(bind=engine)
+    
 @app.post('/users/', status_code=status.HTTP_201_CREATED,response_model=UserPublic)
 def create_user(user: UserSchema,db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
@@ -49,7 +46,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
 @app.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends(get_db),):
-    user = crud.get_user_by_email(form_data.username)
+    user = crud.get_user_by_email(db, form_data.username)
 
     if not user:
         raise HTTPException(
@@ -62,3 +59,5 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Incorrect email or password',
         )
+        
+    return {"message": "Autenticado com sucesso!"}

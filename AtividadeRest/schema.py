@@ -2,13 +2,13 @@
 from pydantic import BaseModel,EmailStr,ConfigDict
 
 class UserSchema(BaseModel):
-    username: str
+    name: str
     email: EmailStr
-    password: str
+    senha: str
 
 class UserPublic(BaseModel):
     id: int
-    username: str
+    name: str
     email: EmailStr
     model_config = ConfigDict(from_attributes=True)
 
