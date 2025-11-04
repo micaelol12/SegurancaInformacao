@@ -6,7 +6,7 @@ from security import get_password_hash
 
 
 def criar_usuario_db(db: Session, user: UserSchema):
-    db_user = User(name=user.name, email=user.email,senha = get_password_hash(user.senha))
+    db_user = User(nome=user.nome, email=user.email,senha = get_password_hash(user.senha))
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
