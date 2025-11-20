@@ -1,96 +1,123 @@
-from utils import AES_SBOX
+from KeyManager import KeyManager
+from BlockManager import BlockManager
+from Class import Key, Matrix
+from utils import get_state_matrix, AES_SBOX, AES_INV_SBOX, MULTIPLICATION_MATRIX, MULTIPLICATION_INV_MATRIX
 
-KEY_SIZE = 128
-BLOCK_SIZE = 128
-
-Word = list[int]  # 4 bytes como inteiros
-Key = list[Word]  # 4 palavras por round key
 
 class AES():
-    def __init__(self):
-        self.key = b'ABCDEFGHIJKLMNOP'
-        self.get_original_key()
+    def __init__(self, key: list[bytes]):
+        self.key = key
+        self.key_manager = KeyManager(self.key)
+        self.block_manager = BlockManager()
 
-    def get_state_matrix(self) -> list[list[int]]:
-        matrix = [[self.key[i + j*4] for j in range(4)] for i in range(4)]
-        return matrix
+    def encrypt(self, msg: bytes):
+        key_schedule = self.key_manager.expand_keys()
+        padded = self.block_manager.fill_block(msg)
+        blocks = self.block_manager.divide_by_blocks(padded)
+        encrypted_data = b''
 
-    def get_original_key(self) -> Key:
-        state_matrix = self.get_state_matrix()
-        original_key = []
+        for block in blocks:
+            eb = self.__encrypt_block(block, key_schedule)
+            encrypted_data += self.__matrix_to_bytes(eb)
 
-        for c in range(4):
-            word = [state_matrix[i][c] for i in range(4)]
-            original_key.append(word)
+        return encrypted_data
 
-        return original_key
+    def decrypt(self, msg: bytes):
+        key_schedule = self.key_manager.expand_keys()
+        blocks = self.block_manager.divide_by_blocks(msg)
 
-    def expand_keys(self) -> list[Key]:
-        original_key = self.get_original_key()
-        key_schedule: list[Key] = []
+        decrypted_data = b''
 
-        key_schedule.append(original_key)
+        for block in blocks:
+            eb = self.__decrypt_block(block, key_schedule)
+            bytes = self.__matrix_to_bytes(eb)
+            decrypted_data += bytes
 
-        for i in range(1, 11):
-            round_key = self.create_round_key(last_round_key=key_schedule[i-1], number=i)
-            key_schedule.append(round_key)
+        return self.block_manager.unfill_block(decrypted_data)
 
-        return key_schedule
+    def __matrix_to_bytes(self, matrix: Matrix) -> bytes:
+        return bytes([matrix[row][col] for col in range(4) for row in range(4)])
 
-    def create_round_key(self, last_round_key: Key, number: int) -> Key:
-        round_key = []
+    def __encrypt_block(self, block: list[int], key_schedule: list[Key]):
+        state_matrix = get_state_matrix(block)
+        a = self.__add_round_key(state_matrix, key_schedule[0])
 
-        first_word = self.get_round_key_first_word(last_round_key, number)
-        round_key.append(first_word)
+        for i in range(1, 10):
+            b = self.__sub_bytes(a)
+            c = self.__shift_rows(b)
+            d = self.__mix_columns(c)
+            a = self.__add_round_key(d, key_schedule[i])
+
+        b = self.__sub_bytes(a)
+        c = self.__shift_rows(b)
+
+        return self.__add_round_key(c, key_schedule[10])
+
+    def __decrypt_block(self, block: list[int], key_schedule: list[Key]):
+        state_matrix = get_state_matrix(block)
+        a = self.__add_round_key(state_matrix, key_schedule[10])
+        b = self.__shift_rows(a, inverse=True)
+        c = self.__sub_bytes(b, inverse=True)
+
+        for i in range(9, 0, -1):
+            a = self.__add_round_key(c, key_schedule[i])
+            d = self.__mix_columns(a, inverse=True)
+            b = self.__shift_rows(d, inverse=True)
+            c = self.__sub_bytes(b, inverse=True)
+
+        return self.__add_round_key(c, key_schedule[0])
+
+    def __mix_columns(self, matrix: Matrix, inverse: bool = False) -> Matrix:
+        new_state = [[0] * 4 for _ in range(4)]
+        multiplication_matrix = MULTIPLICATION_INV_MATRIX if inverse else MULTIPLICATION_MATRIX
+
+        for i in range(4):
+            for j in range(4):
+                new_state[i][j] = self.__mixColumnOperation(
+                    matrix, multiplication_matrix, i, j)
+
+        return new_state
+
+    def __mixColumnOperation(self, matrix: Matrix, multiplication_matrix: Matrix, row: int, col: int) -> int:
+        operation_column = [matrix[r][col] for r in range(4)]
+        operation_row = [multiplication_matrix[row][c] for c in range(4)]
+
+        return self.__galois_muiltiplication(operation_column, operation_row)
+
+    def __galois_muiltiplication(self, col: list[int], row: list[int]) -> int:
+        result = 0
+        for i in range(4):
+            result ^= self.__gf_mul(row[i], col[i])
+
+        return result
+
+    def __gf_mul(self, a: int, b: int) -> int:
+        result = 0
+        for _ in range(8):
+            if b & 1:
+                result ^= a
+            hi_bit_set = a & 0x80
+            a = (a << 1) & 0xFF
+            if hi_bit_set:
+                a ^= 0x1B
+            b >>= 1
+        return result
+
+    def __sub_bytes(self, matrix: Matrix, inverse: bool = False) -> Matrix:
+        sbox = AES_INV_SBOX if inverse else AES_SBOX
+        return [[sbox[i] for i in linha] for linha in matrix]
+
+    def __shift_rows(self, matrix: Matrix, inverse: bool = False) -> Matrix:
+        new_state = [[0] * 4 for _ in range(4)]
+
+        new_state[0] = matrix[0]
 
         for i in range(1, 4):
-            prev_word = round_key[i-1]
-            last_word = last_round_key[i]
-            word = [prev_word[j] ^ last_word[j] for j in range(4)]
-            round_key.append(word)
+            if inverse:
+                new_state[i] = matrix[i][-i:] + matrix[i][:-i]
+            else:
+                new_state[i] = matrix[i][i:] + matrix[i][:i]
+        return new_state
 
-        return round_key
-
-    def get_round_key_first_word(self, last_round_key: Key, number: int) -> Word:
-        last_word = last_round_key[-1]
-        first_word = last_round_key[0]
-        rotated_word = self.round_bytes(last_word)
-        replaced_word = self.word_replacement(rotated_word)
-        round_constant = self.get_round_constant(number)
-        xor_word = [replaced_word[i] ^ round_constant[i] for i in range(4)]
-        final_word = [first_word[i] ^ xor_word[i] for i in range(4)]
-        
-        return final_word
-
-    def word_replacement(self, word: Word) -> Word:
-        return [AES_SBOX[b] for b in word]
-
-    def xtime(self, x: int) -> int:
-        return ((x << 1) ^ 0x1B) & 0xFF if x & 0x80 else (x << 1)
-
-    def round_bytes(self, bytes: Word) -> Word:
-        return bytes[1:] + bytes[:1]
-
-    def get_round_constant(self, number: int) -> Word:
-        rcon = 1
-        for _ in range(1, number):
-            rcon = self.xtime(rcon)
-        return [rcon, 0x00, 0x00, 0x00]
-
-    def divide_by_blocks(self):
-        pass
-
-    def fill_block(self):
-        pass
-
-    def unfill_block(self):
-        pass
-
-    def encrypt_block(self):
-        pass
-
-    def decrypt_block(self):
-        pass
-
-
-aes = AES()
+    def __add_round_key(self, simple_text: Matrix, round_key: Key) -> Matrix:
+        return [[simple_text[row][col] ^ round_key[col][row] for col in range(4)] for row in range(4)]
